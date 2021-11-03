@@ -19,7 +19,9 @@ app.get("/",(req,res) => {
 })
 io.on('connection',(socket) => {
     console.log("A user connected!!!")
+    socket.emit("My-id",socket.id);
 })
+
 const PORT = process.env.PORT || 3100;
 http.listen(PORT,() => {
     console.log(`OUR APP RUNNING IN ${PORT}`)
