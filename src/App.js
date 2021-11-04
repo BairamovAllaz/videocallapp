@@ -18,6 +18,7 @@ function App() {
       <Call 
       video = {video}
       stream = {stream}
+      setstream = {setstream}
       />
     </div>
   );
