@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Peer from "simple-peer"
+import {FcCursor, FcDataEncryption, FcVideoCall} from 'react-icons/fc'
 import { io } from 'socket.io-client';
+import { getAllByPlaceholderText } from '@testing-library/react';
 const socket = io("http://localhost:3100/", { transports: ['websocket'] });
 function Call({ video, stream, setstream }) {
 
@@ -15,21 +17,19 @@ function Call({ video, stream, setstream }) {
     ///call accseptted;
     const [CallAccsepted, setCallAccsepted] = useState(false);
     const [ReciviningCall, setReciviningCall] = useState(false);
-
+    const UserVideo = useRef();
     useEffect(() => {
         socket.on("callUser", ({ signal, from, UserName }) => {
-            setReciviningCall(true)
             setCalledUser({signal, from, name: UserName })
+            setReciviningCall(true);
         })
     }, [])
-
-
     const call = () => {
-        const UserName = prompt("Enter a username")
+        const UserName = "Ellez"
         setUserName(UserName);
-
         const peer = new Peer({ initiator: true, trickle: false, stream });
         peer.on('signal', function (data) {
+            // setReciviningCall(true)
             socket.emit('calluser', {
                 useToCall: UserToCall,
                 stream: data,
@@ -37,35 +37,50 @@ function Call({ video, stream, setstream }) {
                 UserName: UserName
             })
         })
-        peer.on('stream', (cureentStream) => {
-            video.current.srcObject = cureentStream;
-        })
-
-
-
+        // peer.on('stream', (cureentStream) => {
+        //     video.current.srcObject = cureentStream;
+        // })
+        SetUserToCall("")
     }
-
-
-
+    const answerCall = () => { 
+        setCallAccsepted(true);
+        const peer = new Peer({ initiator: true, trickle: false, stream });
+        peer.on('signal',(data) => {
+            socket.emit("answerCall",{signal : data,to : CalledUser.from})
+        })
+        peer.on('stream',(currentstream) => { 
+            UserVideo.current.srcObject = currentstream;
+        })
+        peer.signal(CalledUser.signal)
+        console.log(peer);
+    }
     socket.on("My-id", (id) => {
         console.log(id);
         setMyid(id);
     })
-
     return (
         <div>
             <div style={{
-                width: "300px",
-                height: "300px",
+                width: "200px",
+                height: "200px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center"
             }}>
                 <video ref={video} autoPlay />
+                { 
+                    CallAccsepted ? ( 
+                        <div>
+                            <video ref = {UserVideo} autoPlay/>
+                        </div>
+                    ) : (
+                        <div></div>
+                    )
+                }
             </div>
 
             <div style={{
-                marginTop: "100px"
+                marginTop: "140px"
             }}>
                 <input
                     style={{
@@ -77,6 +92,7 @@ function Call({ video, stream, setstream }) {
                     onChange={(e) => {
                         SetUserToCall(e.target.value);
                     }}
+                    value = {UserToCall}
                 />
                 <button style={{
                     width: "100px",
@@ -102,7 +118,23 @@ function Call({ video, stream, setstream }) {
                 }}>
             {
                 ReciviningCall ? (
-                    <div>Hello</div>
+                    <div
+                    style = {{
+                        display : "flex",
+                        padding: "10px"
+                    }}
+                    >
+                        <p>Called user {CalledUser.name}</p>
+                        <FcVideoCall 
+                        style = {{
+                            marginTop : "5px",
+                            fontSize : "40px",
+                            marginLeft : "10px", 
+                            cursor : "pointer"
+                        }}
+                        onClick = {answerCall}
+                        />
+                    </div>
                 ) : (
                     <div>null</div>
                 )

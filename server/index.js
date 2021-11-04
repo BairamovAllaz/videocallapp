@@ -22,10 +22,14 @@ io.on('connection',(socket) => {
     console.log("A user connected!!!")
     socket.emit("My-id",socket.id);
 
-    socket.on("calluser",({userToCall,stream,Me,UserName}) => { 
-        io.to(userToCall).emit("callUser",{signal : stream,from : Me,UserName : UserName})
+    socket.on('calluser',({useToCall,stream,Me,UserName}) => { 
+        io.to(useToCall).emit("callUser",{signal : stream,from : Me,UserName : UserName})
     })
 
+    socket.on('answerCall',({signal,to}) => {
+        console.log(signal)
+        console.log(to);
+    })
 
 })
 
