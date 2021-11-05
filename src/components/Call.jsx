@@ -19,8 +19,8 @@ function Call({ video, stream, setstream }) {
     const [ReciviningCall, setReciviningCall] = useState(false);
     const UserVideo = useRef();
     useEffect(() => {
-        socket.on("callUser", ({ signal, from, UserName }) => {
-            setCalledUser({signal, from, name: UserName })
+        socket.on("Acall", ({ UserName,stream,Me }) => {
+            setCalledUser({UserName,stream,Me})
             setReciviningCall(true);
         })
     }, [])
@@ -28,36 +28,65 @@ function Call({ video, stream, setstream }) {
         const UserName = "Ellez"
         setUserName(UserName);
         const peer = new Peer({ initiator: true, trickle: false, stream });
-        peer.on('signal', function (data) {
-            // setReciviningCall(true)
-            socket.emit('calluser', {
-                useToCall: UserToCall,
-                stream: data,
-                Me: myId,
-                UserName: UserName
-            })
+       
+        peer.on('signal',(data) => {
+            socket.emit('CallPerson',({
+                UserName : UserName,
+                Me : myId,
+                UserToCall : UserToCall,
+                stream : data
+            }));
         })
-        // peer.on('stream', (cureentStream) => {
-        //     video.current.srcObject = cureentStream;
+        peer.on('stream',(currentstream) => {
+            console.log(currentstream)
+        })
+        // peer.on('signal', function (data) {
+        //     // setReciviningCall(true)
+        //     socket.emit('calluser', {
+        //         useToCall: UserToCall,
+        //         stream: data,
+        //         Me: myId,
+        //         UserName: UserName
+        //     })
+
         // })
+        // peer.on('stream', (cureentStream) => {
+        //      UserVideo.current.srcObject = cureentStream;
+        // })
+
+        // socket.on('Call-accsepted',(signal) => { 
+        //     setCallAccsepted(true);
+        //     peer.signal(signal);
+        // })
+
+
         SetUserToCall("")
     }
+
+
+
+
+
     const answerCall = () => { 
-        setCallAccsepted(true);
-        const peer = new Peer({ initiator: true, trickle: false, stream });
-        peer.on('signal',(data) => {
-            socket.emit("answerCall",{signal : data,to : CalledUser.from})
-        })
-        peer.on('stream',(currentstream) => { 
-            UserVideo.current.srcObject = currentstream;
-        })
-        peer.signal(CalledUser.signal)
-        console.log(peer);
+        // setCallAccsepted(true);
+        // const peer = new Peer({ initiator: true, trickle: false, stream });
+        // peer.on('signal',(data) => {
+        //     socket.emit("answerCall",{signal : data,to : CalledUser.from})
+        // })
+        // peer.on('stream',(currentstream) => { 
+        //     UserVideo.current.srcObject = currentstream;
+        // })
+        // peer.signal(CalledUser.signal)
+        // console.log(peer);
     }
+
+    
     socket.on("My-id", (id) => {
-        console.log(id);
+        console.log("Your peeer id  = " + id);
         setMyid(id);
     })
+   
+   
     return (
         <div>
             <div style={{
@@ -124,7 +153,7 @@ function Call({ video, stream, setstream }) {
                         padding: "10px"
                     }}
                     >
-                        <p>Called user {CalledUser.name}</p>
+                        <p>Called user {CalledUser.UserName}</p>
                         <FcVideoCall 
                         style = {{
                             marginTop : "5px",

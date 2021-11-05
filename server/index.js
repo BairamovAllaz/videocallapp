@@ -2,7 +2,6 @@ const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
 const cors = require("cors");
-const { unstable_concurrentAct } = require("react-dom/cjs/react-dom-test-utils.production.min");
 const io = require("socket.io")(http,{
     cors : {
         origin : ["http://localhost:3000/"],
@@ -22,14 +21,30 @@ io.on('connection',(socket) => {
     console.log("A user connected!!!")
     socket.emit("My-id",socket.id);
 
-    socket.on('calluser',({useToCall,stream,Me,UserName}) => { 
-        io.to(useToCall).emit("callUser",{signal : stream,from : Me,UserName : UserName})
+
+    socket.on('CallPerson',({ 
+        UserName,///Username whice call this user!
+        Me,///Called username
+        UserToCall,///this user id
+        stream //Called user stream(video)
+    }) => {  
+        io.to(UserToCall).emit("Acall",({UserName,stream,Me}))
     })
 
-    socket.on('answerCall',({signal,to}) => {
-        console.log(signal)
-        console.log(to);
-    })
+
+
+
+
+
+
+
+    // socket.on('calluser',({useToCall,stream,Me,UserName}) => { 
+    //     io.to(useToCall).emit("callUser",{signal : stream,from : Me,UserName : UserName})
+    // })
+
+    // socket.on('answerCall',({signal,to}) => {
+    //     io.to(signal.to).emit('Call-accsepted',signal.data)
+    // })
 
 })
 
