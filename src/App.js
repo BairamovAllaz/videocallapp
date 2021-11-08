@@ -6,11 +6,8 @@ function App() {
   const video = useRef(null);
   useEffect(() => {
     navigator.mediaDevices.getUserMedia({audio : true,video : true}).then(mediastream => {
-      video.current.srcObject = mediastream;
       setstream(mediastream);
-      video.current.onloadedmetdata = (e) => {
-        video.current.play();
-      }
+      video.current.srcObject = mediastream;
     })
   },[]);
   return (

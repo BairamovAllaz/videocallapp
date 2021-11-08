@@ -1,0 +1,81 @@
+*{
+    padding: 0;
+    margin: 0;
+    background-color: lightgray;
+    overflow-x:hidden
+}
+
+.VideoBox{
+    width: 100%;
+    min-height: 300px;
+    display: flex;
+}
+.InputId{
+    height: 40px;
+    font-size: 20px;
+}
+.CallButton{ 
+    width: 100px;
+    height: 50px;
+    background-color: green;
+    color: white;
+    border-radius: 40px;
+    margin-left: 10px;
+}
+
+.CallsBox{ 
+    width: 100%;
+    height: 70px;
+    border: solid 1px black;
+    margin-top: 50px;
+    display: flex;
+    align-items: center;
+
+}
+
+.videos{ 
+    width: 100%;
+    height: 300px;
+    flex-shrink: 0; /* shrinks to 0 to apply 70% width*/
+    flex-basis: 70%; /* sets initial width to 70% */
+}
+.videos:nth-child(1){
+    margin-left: 20px;
+}
+
+.inputBox{ 
+    margin-top: 140px;
+    margin-left: 40px;
+}
+
+.CallBox{ 
+    width: 100%;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+@media only screen and (max-width: 600px) {
+    .VideoBox{
+        width: 100%;
+        min-height: 300px;
+        flex-direction: column;
+    }
+    .videos {
+        width : 100%;
+        height: 200px;
+        margin: 0 0 1rem;
+    }
+
+    .inputBox{ 
+        margin-top: 70px;
+        display: block;
+        text-align: center;
+    }
+    .CallButton{ 
+        margin-top: 20px;
+    }
+
+  }

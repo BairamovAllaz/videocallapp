@@ -1,34 +1,42 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Peer from "simple-peer"
-import {FcCursor, FcDataEncryption, FcVideoCall} from 'react-icons/fc'
+import {FcVideoCall,FcEndCall} from 'react-icons/fc'
 import { io } from 'socket.io-client';
-import { getAllByPlaceholderText } from '@testing-library/react';
 const socket = io("http://localhost:3100/", { transports: ['websocket'] });
 function Call({ video, stream, setstream }) {
-
-    ///state which user you want call
     const [UserToCall, SetUserToCall] = useState(null);
-    ///your username
     const [UserName, setUserName] = useState(null)
-    ///your uniq id
     const [myId, setMyid] = useState(null)
-    ///
     const [CalledUser, setCalledUser] = useState({})
-    ///call accseptted;
     const [CallAccsepted, setCallAccsepted] = useState(false);
     const [ReciviningCall, setReciviningCall] = useState(false);
+    const [callEnded,setcallEnded] = useState(false);
     const UserVideo = useRef();
     useEffect(() => {
+
+        socket.on("My-id", (id) => {
+            console.log("Your socket id  = " + id);
+            setMyid(id);
+        })
+
+
         socket.on("Acall", ({ UserName,stream,Me }) => {
             setCalledUser({UserName,stream,Me})
             setReciviningCall(true);
         })
     }, [])
     const call = () => {
-        const UserName = "Ellez"
-        setUserName(UserName);
+        if(!UserName){ 
+            const userName = prompt("Plese enter your username")
+            setUserName(userName);
+        }
+
+        if(!UserToCall){ 
+            const socketId = prompt("Plese Socket user")
+            SetUserToCall(socketId);
+        }
+
         const peer = new Peer({ initiator: true, trickle: false, stream });
-       
         peer.on('signal',(data) => {
             socket.emit('CallPerson',({
                 UserName : UserName,
@@ -37,85 +45,82 @@ function Call({ video, stream, setstream }) {
                 stream : data
             }));
         })
-        peer.on('stream',(currentstream) => {
-            console.log(currentstream)
+        socket.on('callAccsepted',({stream}) => {
+            setCallAccsepted(true)
+            peer.signal(stream);
         })
-        // peer.on('signal', function (data) {
-        //     // setReciviningCall(true)
-        //     socket.emit('calluser', {
-        //         useToCall: UserToCall,
-        //         stream: data,
-        //         Me: myId,
-        //         UserName: UserName
-        //     })
-
-        // })
-        // peer.on('stream', (cureentStream) => {
-        //      UserVideo.current.srcObject = cureentStream;
-        // })
-
-        // socket.on('Call-accsepted',(signal) => { 
-        //     setCallAccsepted(true);
-        //     peer.signal(signal);
-        // })
-
-
+        peer.on('stream',(currentstream) => {
+            UserVideo.current.srcObject = currentstream;
+            console.log("user 2 stream")
+        })
         SetUserToCall("")
+        setUserName("")
     }
-
-
-
-
-
     const answerCall = () => { 
-        // setCallAccsepted(true);
-        // const peer = new Peer({ initiator: true, trickle: false, stream });
-        // peer.on('signal',(data) => {
-        //     socket.emit("answerCall",{signal : data,to : CalledUser.from})
-        // })
-        // peer.on('stream',(currentstream) => { 
-        //     UserVideo.current.srcObject = currentstream;
-        // })
-        // peer.signal(CalledUser.signal)
-        // console.log(peer);
-    }
+        setCallAccsepted(true);
+        const peer = new Peer({initiator : false,trickle : false, stream});
+        peer.on('signal',(data) => { 
+            socket.emit('AnswerIncomingCall',{stream : data,from : CalledUser.Me});
+        })
+        peer.on('stream',(currentstream) => { 
+            UserVideo.current.srcObject = currentstream;
+            console.log("User 1 video stream")
+        })
 
-    
-    socket.on("My-id", (id) => {
-        console.log("Your peeer id  = " + id);
-        setMyid(id);
-    })
-   
-   
+        peer.signal(CalledUser.stream);
+    }
+    const EndCall = () => {
+        setCallAccsepted(false);
+        setcallEnded(true)
+        window.location.reload();
+
+    }
     return (
         <div>
-            <div style={{
-                width: "200px",
-                height: "200px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center"
-            }}>
-                <video ref={video} autoPlay />
-                { 
-                    CallAccsepted ? ( 
+            <div className = 'VideoBox'>
+                {
+                    stream && (
                         <div>
-                            <video ref = {UserVideo} autoPlay/>
+                            <video 
+                            className = "videos"
+                            ref = {video}
+                            autoPlay 
+                            />
+                        </div>
+                    )
+                }
+                {
+                    CallAccsepted && !callEnded && UserVideo ? (
+                        <div>
+                             <video
+                                ref = {UserVideo} 
+                                autoPlay 
+                                className = "videos"
+                            />
                         </div>
                     ) : (
                         <div></div>
                     )
                 }
             </div>
-
-            <div style={{
-                marginTop: "140px"
-            }}>
-                <input
-                    style={{
-                        height: "40px",
-                        fontSize: "20px"
+            {
+                !CallAccsepted ? ( 
+                    <div className = 'inputBox'>
+                 <input
+                    style = {{
+                        marginBottom: "20px"
                     }}
+                    className = 'InputId'
+                    type="text"
+                    placeholder="Enter Your Username"
+                    onChange={(e) => {
+                        setUserName(e.target.value);
+                    }}
+                    value = {UserName}
+                />
+                <br/>
+                <input
+                    className = 'InputId'
                     type="text"
                     placeholder="Enter user id to call!!"
                     onChange={(e) => {
@@ -123,30 +128,32 @@ function Call({ video, stream, setstream }) {
                     }}
                     value = {UserToCall}
                 />
-                <button style={{
-                    width: "100px",
-                    height: "50px",
-                    backgroundColor: "green",
-                    color: "white",
-                    borderRadius: "40px",
-                    marginLeft: "10px"
-                }} onClick={call}>
+                
+                <button 
+                className = 'CallButton'
+                onClick={call}>
                     call perrr
                 </button>
             </div>
-
-
-            <div
-                style={{
-                    width: "100%",
-                    height: "70px",
-                    border: "solid 1px black",
-                    marginTop: "50px",
-                    display: "flex",
-                    alignItems: "center"
-                }}>
+                ) : (
+                    <div className = "CallBox">
+                    <h2>End Call</h2>
+                    <FcEndCall
+                    style = {{
+                        paddingLeft: "10px",
+                        fontSize : "40px",
+                        cursor : "pointer"
+                    }}
+                    onClick = {EndCall}
+                    />
+                   </div>
+                )
+            }
             {
-                ReciviningCall ? (
+                 ReciviningCall && !CallAccsepted && (
+                    <div className = 'CallsBox'>
+            
+               
                     <div
                     style = {{
                         display : "flex",
@@ -164,14 +171,9 @@ function Call({ video, stream, setstream }) {
                         onClick = {answerCall}
                         />
                     </div>
-                ) : (
-                    <div>null</div>
-                )
-            }
-
             </div>
-
-
+                 )
+            }
         </div>
     )
 }

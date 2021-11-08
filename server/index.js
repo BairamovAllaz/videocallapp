@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
 const cors = require("cors");
+const { start } = require("repl");
 const io = require("socket.io")(http,{
     cors : {
         origin : ["http://localhost:3000/"],
@@ -29,6 +30,13 @@ io.on('connection',(socket) => {
         stream //Called user stream(video)
     }) => {  
         io.to(UserToCall).emit("Acall",({UserName,stream,Me}))
+    })
+
+    ///answer incoming call user 2
+
+    socket.on('AnswerIncomingCall',({stream,from}) => {
+        io.to(from).emit('callAccsepted',{stream : stream})
+        console.log("You accespedt call which from   " + from);
     })
 
 
