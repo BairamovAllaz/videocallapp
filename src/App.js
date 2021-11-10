@@ -10,6 +10,7 @@ function App() {
       video.current.srcObject = mediastream;
     })
   },[]);
+  //call
   return (
     <div className="App">
       <Call 
