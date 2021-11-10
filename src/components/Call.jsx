@@ -1,16 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Peer from "simple-peer"
-import {FcVideoCall,FcEndCall} from 'react-icons/fc'
 import { io } from 'socket.io-client';
 const socket = io("http://localhost:3100/", { transports: ['websocket'] });
 function Call({ video, stream, setstream }) {
     const [UserToCall, SetUserToCall] = useState(null);
+    const [UserToCall2, SetUserToCall2] = useState(null);
     const [UserName, setUserName] = useState(null)
     const [myId, setMyid] = useState(null)
     const [CalledUser, setCalledUser] = useState({})
     const [CallAccsepted, setCallAccsepted] = useState(false);
     const [ReciviningCall, setReciviningCall] = useState(false);
     const [callEnded,setcallEnded] = useState(false);
+    const [Click,SetClick] = useState(false)
     const UserVideo = useRef();
     useEffect(() => {
 
@@ -24,8 +25,10 @@ function Call({ video, stream, setstream }) {
             setCalledUser({UserName,stream,Me})
             setReciviningCall(true);
         })
-    }, [])
+    },[])
     const call = () => {
+        SetUserToCall2(UserToCall)
+        SetClick(true)
         if(!UserName){ 
             const userName = prompt("Plese enter your username")
             setUserName(userName);
@@ -64,20 +67,27 @@ function Call({ video, stream, setstream }) {
         })
         peer.on('stream',(currentstream) => { 
             UserVideo.current.srcObject = currentstream;
-            console.log("User 1 video stream")
         })
 
         peer.signal(CalledUser.stream);
     }
+
+
     const EndCall = () => {
         setCallAccsepted(false);
         setcallEnded(true)
         window.location.reload();
+    }
 
+
+
+    const GetMyId = () => {
+        alert(myId)
     }
     return (
         <div>
             <div className = 'VideoBox'>
+
                 {
                     stream && (
                         <div>
@@ -89,6 +99,7 @@ function Call({ video, stream, setstream }) {
                         </div>
                     )
                 }
+
                 {
                     CallAccsepted && !callEnded && UserVideo ? (
                         <div>
@@ -103,9 +114,10 @@ function Call({ video, stream, setstream }) {
                     )
                 }
             </div>
+            
             {
                 !CallAccsepted ? ( 
-                    <div className = 'inputBox'>
+                <div className = 'inputBox'>
                  <input
                     style = {{
                         marginBottom: "20px"
@@ -132,47 +144,44 @@ function Call({ video, stream, setstream }) {
                 <button 
                 className = 'CallButton'
                 onClick={call}>
-                    call perrr
+                    Call user
+                </button>
+                <button 
+                className = 'CallButton'
+                onClick = {GetMyId}
+                style ={{
+                    backgroundColor : "red"
+                }}
+                >
+                    Get id
                 </button>
             </div>
                 ) : (
-                    <div className = "CallBox">
-                    <h2>End Call</h2>
-                    <FcEndCall
-                    style = {{
-                        paddingLeft: "10px",
-                        fontSize : "40px",
-                        cursor : "pointer"
-                    }}
+                    <div 
+                    className = "CallBox"
                     onClick = {EndCall}
-                    />
+                    >
+                    End Call
                    </div>
                 )
             }
-            {
-                 ReciviningCall && !CallAccsepted && (
-                    <div className = 'CallsBox'>
-            
-               
-                    <div
-                    style = {{
-                        display : "flex",
-                        padding: "10px"
-                    }}
-                    >
-                        <p>Called user {CalledUser.UserName}</p>
-                        <FcVideoCall 
-                        style = {{
-                            marginTop : "5px",
-                            fontSize : "40px",
-                            marginLeft : "10px", 
-                            cursor : "pointer"
-                        }}
-                        onClick = {answerCall}
-                        />
+
+            {  
+                CalledUser.Me != UserToCall && UserToCall !== null && Click && !CallAccsepted &&( 
+                    <div className = "ItsMe">
+                           Calling User -- {UserToCall2}
                     </div>
-            </div>
-                 )
+                )
+            }
+            {
+            ReciviningCall && !CallAccsepted && (
+                    <div
+                    className = "CallBox"
+                    onClick = {answerCall}
+                    >
+                        Called user {CalledUser.UserName}
+                    </div>
+            )
             }
         </div>
     )
