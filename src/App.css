@@ -4,7 +4,6 @@
     background-color: lightgray;
     overflow-x:hidden
 }
-
 .VideoBox{
     width: 100%;
     min-height: 300px;
@@ -14,7 +13,7 @@
     height: 40px;
     font-size: 20px;
 }
-.CallButton{ 
+.CallButton{
     width: 100px;
     height: 50px;
     background-color: green;
@@ -23,7 +22,7 @@
     margin-left: 10px;
 }
 
-.CallsBox{ 
+.CallsBox{
     width: 100%;
     height: 70px;
     border: solid 1px black;
@@ -33,7 +32,7 @@
 
 }
 
-.videos{ 
+.videos{
     width: 100%;
     height: 300px;
     flex-shrink: 0; /* shrinks to 0 to apply 70% width*/
@@ -43,7 +42,7 @@
     margin-left: 20px;
 }
 
-.inputBox{ 
+.inputBox{
     margin-top: 140px;
     margin-left: 40px;
 }
@@ -54,7 +53,7 @@
     to {background-color: #006400;}
 }
 
-.CallBox{ 
+.CallBox{
     width: 100%;
     height: 60px;
     display: flex;
@@ -73,7 +72,7 @@
 
 
 
-.ItsMe{ 
+.ItsMe{
     width: 100%;
     height: 60px;
     display: flex;
@@ -99,12 +98,12 @@
         margin: 0 0 1rem;
     }
 
-    .inputBox{ 
+    .inputBox{
         margin-top: 30px;
         display: block;
         text-align: center;
     }
-    .CallButton{ 
+    .CallButton{
         margin-top: 20px;
     }
 
